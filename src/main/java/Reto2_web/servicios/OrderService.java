@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OrderService {
-    
-     @Autowired
+
+    @Autowired
     private OrderRepository orderRepository;
 
     public List<Order> getAll() {
@@ -22,44 +22,38 @@ public class OrderService {
         return orderRepository.getOrder(id);
     }
 
-  public Order create(Order order){
-        if (order.getId() == null){
-            return order;
-        } else {
+    public Order create(Order order) {
+
+        Optional<Order> orderIdMaxima = orderRepository.lastUserId();
+
+        if (order.getId() == null) {
+            
+            if (orderIdMaxima.isEmpty()) {
+                order.setId(1);
+            } 
+            else {
+                order.setId(orderIdMaxima.get().getId() + 1);
+            }
+        }
+
+        Optional<Order> e = orderRepository.getOrder(order.getId());
+        if (e.isEmpty()) {
             return orderRepository.create(order);
+        } else {
+            return order;
         }
     }
-  
- public Order update(Order order){
-        if (order.getId() != null){
-            Optional<Order> dbOrder = orderRepository.getOrder(order.getId());
-            if (!dbOrder.isEmpty()) {
 
-                if (order.getId() != null) {
-                    dbOrder.get().setId(order.getId());
-                }
+    public Order update(Order order) {
 
-                if (order.getRegisterDay() != null) {
-                    dbOrder.get().setRegisterDay(order.getRegisterDay());
-                }
-
+        if (order.getId() != null) {
+            Optional<Order> orderDb = orderRepository.getOrder(order.getId());
+            if (!orderDb.isEmpty()) {
                 if (order.getStatus() != null) {
-                    dbOrder.get().setStatus(order.getStatus());
+                    orderDb.get().setStatus(order.getStatus());
                 }
-
-                if (order.getSalesMan() != null) {
-                    dbOrder.get().setSalesMan(order.getSalesMan());
-                }
-
-                if (order.getProducts() != null) {
-                    dbOrder.get().setProducts(order.getProducts());
-                }
-
-                if (order.getQuantities() != null) {
-                    dbOrder.get().setQuantities(order.getQuantities());
-                }
-                orderRepository.update(dbOrder.get());
-                return dbOrder.get();
+                orderRepository.update(orderDb.get());
+                return orderDb.get();
             } else {
                 return order;
             }
@@ -68,16 +62,12 @@ public class OrderService {
         }
     }
 
-
-     public boolean delete(Integer id){
-        return getOrder(id).map(order -> {
+    public boolean delete(int id) {
+        Boolean aBoolean = getOrder(id).map(order -> {
             orderRepository.delete(order);
             return true;
         }).orElse(false);
-    }
-    
-    public List<Order> getOrderByZone(String zone){
-        return orderRepository.getOrderByZone(zone);
+        return aBoolean;
     }
     
     public List<Order> findByZone(String zone) {
@@ -95,5 +85,4 @@ public class OrderService {
     public List<Order> ordersSalesManByDate(String dateStr, Integer id) {
         return orderRepository.ordersSalesManByDate(dateStr,id);
     }
-
 }

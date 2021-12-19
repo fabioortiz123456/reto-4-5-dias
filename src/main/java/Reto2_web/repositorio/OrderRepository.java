@@ -15,20 +15,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class OrderRepository {
+
     @Autowired
     private InterfaceOrder interfaceOrder;
     
     @Autowired
     private MongoTemplate mongoTemplate;
-    
-    public List<Order> getAll(){
-        return interfaceOrder.findAll();
+
+    public List<Order> getAll() {
+        return (List<Order>) interfaceOrder.findAll();
     }
-    
-      public Optional<Order> getOrder(Integer id){
+
+    public Optional<Order> getOrder(int id) {
         return interfaceOrder.findById(id);
     }
-           
+
     public Order create(Order order) {
         return interfaceOrder.save(order);
     }
@@ -36,16 +37,15 @@ public class OrderRepository {
     public void update(Order order) {
         interfaceOrder.save(order);
     }
-    
+
     public void delete(Order order) {
         interfaceOrder.delete(order);
     }
-    
-   
-    public List<Order> getOrderByZone(String zone){
-        return interfaceOrder.findBySalesManZone(zone);
+
+    public Optional<Order> lastUserId() {
+        return interfaceOrder.findTopByOrderByIdDesc();
     }
-    
+
     public List<Order> findByZone(String zona) {
         return interfaceOrder.findByZone(zona);
     }
@@ -89,5 +89,4 @@ public class OrderRepository {
         
         return orders;       
     }
- 
 }
